@@ -1,12 +1,14 @@
+from gettext import bind_textdomain_codeset
 from scipy.io import wavfile
 from scipy.fft import fft, fftfreq, rfft, rfftfreq
 import numpy as np
+import math
 
 import pickle
 import matplotlib.pyplot as plt
 
 
-def wav_to_bins(sample_rate, origin_data, song_name, bin_count=50, second_freq=20):
+def wav_to_bins(sample_rate, origin_data, song_name, bin_count=70, second_freq=100):
     duration = origin_data.shape[0] // sample_rate
     bins = []
 
@@ -16,15 +18,18 @@ def wav_to_bins(sample_rate, origin_data, song_name, bin_count=50, second_freq=2
         print(current_second)
         for i in range(second_freq):
 
-            data = origin_data[:, 0] + origin_data[:, 1]
-            cur_sec = 80
+            if len(origin_data.shape) == 1:
+                data = origin_data
+            else:
+                data = origin_data[:, 0] + origin_data[:, 1]
 
-            chunk_size = 10000
+            chunk_size = 20000
+            # crop_size = 10000
 
             data = data[
-                sample_rate * cur_sec
+                sample_rate * current_second
                 + ((sample_rate - chunk_size) // second_freq * i) : sample_rate
-                * cur_sec
+                * current_second
                 + chunk_size
                 + ((sample_rate - chunk_size) // second_freq * i)
             ]
@@ -37,8 +42,17 @@ def wav_to_bins(sample_rate, origin_data, song_name, bin_count=50, second_freq=2
             x, c = zip(*sorted(zip(x, np.abs(c))))
             x, c = list(x), list(c)
 
-            x = x[(chunk_size - 2000) // 2 : -(chunk_size - 2000) // 2]
-            c = c[(chunk_size - 2000) // 2 : -(chunk_size - 2000) // 2]
+            for i, val in enumerate(x):
+                if val > 2000:
+                    x = x[: i + 1]
+                    c = c[: i + 1]
+                    break
+
+            # print(len(x), x[-1])
+
+            # print(x[0], x[-1])
+            # x = x[(chunk_size - crop_size) // 2 : -(chunk_size - crop_size) // 2]
+            # c = c[(chunk_size - crop_size) // 2 : -(chunk_size - crop_size) // 2]
 
             histogram = []
 
@@ -59,9 +73,25 @@ def wav_to_bins(sample_rate, origin_data, song_name, bin_count=50, second_freq=2
                 plt.savefig("img2.jpg")
                 flag = False
 
-    with open(f'{song_name}.pickle', 'wb') as f:
+
+    bins = [[math.log2(bin + 1) for bin in hist] for hist in bins]
+
+    # mean = np.average(bins)
+    # std = np.std(bins)
+    # bins = [[(bin - mean) / std for bin in hist] for hist in bins]
+
+    min_bin = min([min(hist) for hist in bins])
+    bins = [[bin + min_bin for bin in hist] for hist in bins]
+
+    max_bin = max([max(hist) for hist in bins])
+    bins = [[bin / max_bin for bin in hist] for hist in bins]
+
+    min_bins = [min(hist) for hist in bins]
+    bins = [[bin - min_bin for bin in hist] for min_bin, hist in zip(min_bins, bins)]
+
+    with open(f"{song_name}.pickle", "wb") as f:
         pickle.dump(bins, f)
 
 
-sample_rate, data = wavfile.read("./static/one_last_kiss.wav")
-wav_to_bins(sample_rate, data, "one_last_kiss", 50, 20, )
+# sample_rate, data = wavfile.read("./static/beautiful_world.wav")
+# wav_to_bins(sample_rate, data, "beautiful_world", 50, 20, )

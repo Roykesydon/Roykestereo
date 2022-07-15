@@ -1,10 +1,16 @@
 from flask import Flask, Response, render_template
+from flask_cors import CORS
 from scipy.io import wavfile
 from scipy.fftpack import fft
+
+from music.api import music
 
 import matplotlib.pyplot as plt
 
 app = Flask(__name__, static_folder='static')
+CORS(app)
+
+app.register_blueprint(music, url_prefix="/music")
 
 
 @app.route("/wav")

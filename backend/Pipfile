@@ -7,6 +7,7 @@ name = "pypi"
 flask = "*"
 scipy = "*"
 matplotlib = "*"
+flask-cors = "*"
 
 [dev-packages]
 
