@@ -48,11 +48,11 @@ export default {
     },
     width: {
       type: Number,
-      default: 400,
+      default: 100,
     },
     height: {
       type: Number,
-      default: 400,
+      default: 100,
     },
     cssClasses: {
       default: "",
@@ -80,9 +80,11 @@ export default {
     return {
       chartOptions: {
         responsive: true,
+        maintainAspectRatio: false,
         animation: {
-          duration: 100,
+          duration: 500,
         },
+        color: "#666",
         plugins: {
           legend: {
             display: false,
@@ -90,7 +92,7 @@ export default {
         },
         events: [],
         layout: {
-          padding: 100,
+          padding: 10,
         },
         scales: {
           x: {

@@ -1,3 +1,4 @@
+import chunk
 from gettext import bind_textdomain_codeset
 from scipy.io import wavfile
 from scipy.fft import fft, fftfreq, rfft, rfftfreq
@@ -8,7 +9,15 @@ import pickle
 import matplotlib.pyplot as plt
 
 
-def wav_to_bins(sample_rate, origin_data, song_name, bin_count=70, second_freq=100):
+def wav_to_bins(
+    sample_rate,
+    origin_data,
+    song_name,
+    bin_count=100,
+    second_freq=20,
+    max_hz=2000,
+    chunk_size=2250,
+):
     duration = origin_data.shape[0] // sample_rate
     bins = []
 
@@ -23,31 +32,33 @@ def wav_to_bins(sample_rate, origin_data, song_name, bin_count=70, second_freq=1
             else:
                 data = origin_data[:, 0] + origin_data[:, 1]
 
-            chunk_size = 20000
+            partition_size = sample_rate // second_freq
             # crop_size = 10000
 
             data = data[
                 sample_rate * current_second
-                + ((sample_rate - chunk_size) // second_freq * i) : sample_rate
-                * current_second
+                + partition_size * i : sample_rate * current_second
+                + partition_size * i
                 + chunk_size
-                + ((sample_rate - chunk_size) // second_freq * i)
             ]
 
             b = [(ele / 2**17.0) for ele in data]
             c = rfft(b)
             x = rfftfreq(len(b), 1 / sample_rate)
-            chunk_size = len(x)
 
             x, c = zip(*sorted(zip(x, np.abs(c))))
             x, c = list(x), list(c)
 
+            # print(len(x), len(c))
+            # print(x[0], x[-1])
+
             for i, val in enumerate(x):
-                if val > 2000:
+                if val > max_hz:
                     x = x[: i + 1]
                     c = c[: i + 1]
                     break
 
+            # print(len(x))
             # print(len(x), x[-1])
 
             # print(x[0], x[-1])
@@ -72,7 +83,6 @@ def wav_to_bins(sample_rate, origin_data, song_name, bin_count=70, second_freq=1
                 plt.title("fft")
                 plt.savefig("img2.jpg")
                 flag = False
-
 
     bins = [[math.log2(bin + 1) for bin in hist] for hist in bins]
 

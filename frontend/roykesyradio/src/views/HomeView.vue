@@ -1,34 +1,45 @@
 <template>
   <div class="home">
-    <bar-chart :chartData="chartData" />
-    {{ currentAudioName || audioList[0].name }}
-    <audio-player
-      ref="audioPlayer"
-      :audio-list="audioList.map((elm) => elm.url)"
-      :before-play="handleBeforePlay"
-      theme-color="#ff2929"
-    />
-    <audio controls>
-      <source
-        src="http://192.168.100.158:5000/static/the_edge.wav"
-        type="audio/mpeg"
-      />
-    </audio>
-    <img alt="Vue logo" src="../assets/logo.png" />
-    <HelloWorld msg="Welcome to Your Vue.js App" />
+    <v-container class="pa-0 ma-0">
+      <v-row style="height: 89vh; width: 85vw" justify="center">
+        <div class="d-flex align-end justify-center pb-3">
+          <!-- {{ currentAudioName || audioList[0].name }} -->
+          <bar-chart
+            style="height: 40vh; width: 70vw; position: float; right: 0px"
+            class="wave"
+            :chartData="chartData"
+          />
+        </div>
+      </v-row>
+
+      <v-row
+        style="height: 13vh; width: 90vw"
+        justify="center"
+        class="grey darken-4 pa-4"
+      >
+        <div style="width: 60vw">
+          <audio-player
+            ref="audioPlayer"
+            :audio-list="audioList.map((elm) => elm.url)"
+            :before-play="handleBeforePlay"
+            theme-color="#9df07d"
+          />
+        </div>
+      </v-row>
+    </v-container>
   </div>
 </template>
 
 <script>
 // @ is an alias to /src
-import HelloWorld from "@/components/HelloWorld.vue";
+// import HelloWorld from "@/components/HelloWorld.vue";
 import BarChart from "@/components/BarChart.vue";
 import AudioPlayer from "@liripeng/vue-audio-player";
 
 export default {
   name: "HomeView",
   components: {
-    HelloWorld,
+    // HelloWorld,
     BarChart,
     AudioPlayer,
   },
@@ -44,22 +55,19 @@ export default {
         let i = 0;
         let _this = this;
         let frameCount = 0;
-        let secondFreq = 100;
+        let secondFreq = 20;
 
         function myLoop() {
           //  create a loop function
           setTimeout(function () {
             if (_this.$refs.audioPlayer.currentTime === "") {
-              this.chartData = {
-                labels: Array(70).fill(0),
-                datasets: [{ data: Array(70).fill(0) }],
-              };
+              _this.chartData = _this.getEmptyChart();
               myLoop();
               return;
             }
             //  call a 3s setTimeout when the loop is called
             // console.log(_this.chartData);
-            let currentTime = Math.floor(_this.$refs.audioPlayer.currentTime);
+            let currentTime = Math.ceil(_this.$refs.audioPlayer.currentTime);
             if (isNaN(lastTime)) {
               lastTime = currentTime;
             } else if (lastTime != currentTime) {
@@ -98,33 +106,6 @@ export default {
         }
 
         myLoop();
-
-        // for (;;) {
-        //   let currentTime = Date.now();
-        //   // console.log(startTime);
-        //   // console.log((currentTime - startTime) % 1000);
-        //   // console.log(((currentTime - startTime) % 1000) / 20);
-        //   if (
-        //     (currentTime - startTime) / 1000 == lastTime[0] &&
-        //     ((currentTime - startTime) % 1000) / 20 == lastTime[1]
-        //   )
-        //     continue;
-
-        //   lastTime = [
-        //     (currentTime - startTime) / 1000,
-        //     ((currentTime - startTime) % 1000) / 20,
-        //   ];
-
-        //   this.chartData.labels = response.data.wave[lastTime[0] + lastTime[1]];
-        //   this.chartData.datasets = [
-        //     { data: response.data.wave[lastTime[0] + lastTime[1]] },
-        //   ];
-        //   await setTimeout(() => {}, 1000);
-        // }
-
-        // for (let i = 0; i < response.data.wave.length; i++) {
-        //   this.chartData.datasets = [{ data: response.data.wave[i] }];
-        // }
       })
       .catch((error) => {
         console.log(error);
@@ -136,10 +117,7 @@ export default {
   data() {
     return {
       currentAudioName: "",
-      chartData: {
-        labels: Array(70).fill(0),
-        datasets: [{ data: Array(70).fill(0) }],
-      },
+      chartData: this.getEmptyChart(),
       audioList: [
         {
           name: "audio1",
@@ -153,6 +131,17 @@ export default {
     };
   },
   methods: {
+    getEmptyChart() {
+      return {
+        labels: Array(100).fill(0),
+        datasets: [
+          {
+            backgroundColor: "#c774f7",
+            data: Array(100).fill(0),
+          },
+        ],
+      };
+    },
     handleBeforePlay(next) {
       // There are a few things you can do here...
       this.currentAudioName =
@@ -163,3 +152,9 @@ export default {
   },
 };
 </script>
+
+<style>
+.main {
+  min-height: 70vh;
+}
+</style>
