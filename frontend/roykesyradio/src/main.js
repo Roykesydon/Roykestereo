@@ -5,6 +5,7 @@ import router from "./router";
 import vuetify from "./plugins/vuetify";
 
 Vue.config.productionTip = false;
+axios.defaults.withCredentials = true;
 Vue.prototype.$axios = axios;
 
 new Vue({

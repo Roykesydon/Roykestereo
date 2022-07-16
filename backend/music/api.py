@@ -9,7 +9,7 @@ from flask import Blueprint, request
 from utils.music_process import wav_to_bins
 
 music = Blueprint("music", __name__)
-CORS(music)
+CORS(music, supports_credentials=True)
 
 
 @music.route("/")
@@ -31,9 +31,9 @@ def index():
 #     return bins
 
 
-@music.route("/audio_wave", methods=["GET"])
+@music.route("/audio_wave/", methods=["GET"])
 def audio_wave():
-    with open("the_edge.pickle", "rb") as file:
+    with open("one_last_kiss.pickle", "rb") as file:
         return {"wave": pickle.load(file)}
     # with open("one_last_kiss.pickle", "rb") as file:
     #     return {"wave": pickle.load(file)}

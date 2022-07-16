@@ -1,61 +1,27 @@
 <template>
-  <div class="home pa-10" style="overflow-y: scroll">
-    <!-- <v-container class="pa-0 ma-0">
-      <v-row style="height: 89vh; width: 90vw" justify="center"> -->
-    <!-- {{ currentAudioName || audioList[0].name }} -->
-    <!-- <v-row> </v-row> -->
-    <v-row
-      style="height: 85vh; width: 80vw; overflow-x: hidden"
-      justify="center"
-      class="d-flex flex-column"
-    >
-      <div
-        class="d-flex align-start justify-center pa-0 ma-10 flex-column"
-        style="height: 60vh; width: 10vw"
+  <div class="home">
+    <!-- <v-row
+        style="height: 45vh; width: 90vw"
+        justify="center"
+        class="grey darken-4 pa-0"
       >
-        <div class="logo-wall" style="width: 30vw">
-          <div class="logo-wrapper first">
-            <div
-              class="mt-0 mb-10 font-weight-thin text-h2"
-              style="white-space: nowrap"
-            >
-              <span class="mr-5" v-for="i in 20" :key="i">
-                One last kiss / 宇多田光
-                &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-              </span>
-            </div>
-          </div>
-          <!-- <div class="logo-wrapper second">
-            <div
-              class="mt-0 mb-10 font-weight-thin text-h2"
-              style="white-space: nowrap"
-            >
-              One last kiss / 宇多田光
-            </div>
-          </div> -->
-        </div>
-
-        <div class="mb-0">
-          <div class="d-flex align-center justify-center">
-            <v-img
-              src="@/assets/image/headphone.jpg"
-              min-width="20vw"
-              max-width="20vw"
-              max-height="20vw"
-              min-height="20vw"
-              :aspect-ratio="1 / 1"
-            ></v-img>
-
-            <!-- {{ currentAudioName || audioList[0].name }} -->
-
-            <bar-chart
-              style="height: 30vh; width: 55vw"
-              class="my-auto px-10"
-              :chartData="chartData"
-            />
-          </div>
-        </div>
-        <div class="mt-5 mb-10 font-weight-thin text-h5"></div>
+        <v-img
+          src="@/assets/image/headphone.jpg"
+          min-width="15vw"
+          max-width="15vw"
+          max-height="15vw"
+          min-height="15vw"
+          :aspect-ratio="1 / 1"
+        ></v-img>
+      </v-row> -->
+    <v-row style="height: 89vh; width: 90vw" justify="center">
+      <div class="d-flex align-end justify-center pb-3">
+        <!-- {{ currentAudioName || audioList[0].name }} -->
+        <bar-chart
+          style="height: 40vh; width: 70vw; position: float; right: 0px"
+          class="wave"
+          :chartData="chartData"
+        />
       </div>
     </v-row>
   </div>
@@ -65,12 +31,12 @@
 // @ is an alias to /src
 // import HelloWorld from "@/components/HelloWorld.vue";
 import BarChart from "@/components/BarChart.vue";
-// import AudioPlayer from "@liripeng/vue-audio-player";
 import { apiAddress } from "@/config.js";
 
 export default {
-  name: "HomeView",
+  name: "SongListView",
   components: {
+    // HelloWorld,
     BarChart,
   },
   async mounted() {
@@ -91,26 +57,20 @@ export default {
         function myLoop() {
           //  create a loop function
           setTimeout(function () {
-            if (
-              _this.$parent.$parent.$parent.$refs.audioPlayer.currentTime === ""
-            ) {
+            if (_this.$refs.audioPlayer.currentTime === "") {
               _this.initChart();
               myLoop();
               return;
             }
-            // console.log(_this.$parent.$parent.$parent.$refs.audioPlayer.isPlaying);
-            if (
-              _this.$parent.$parent.$parent.$refs.audioPlayer.isPlaying != true
-            ) {
+            // console.log(_this.$refs.audioPlayer.isPlaying);
+            if (_this.$refs.audioPlayer.isPlaying != true) {
               _this.initChart();
               myLoop();
               return;
             }
             //  call a 3s setTimeout when the loop is called
             // console.log(_this.chartData);
-            let currentTime = Math.ceil(
-              _this.$parent.$parent.$parent.$refs.audioPlayer.currentTime
-            );
+            let currentTime = Math.ceil(_this.$refs.audioPlayer.currentTime);
             if (isNaN(lastTime)) {
               lastTime = currentTime;
             } else if (lastTime != currentTime) {
@@ -143,7 +103,7 @@ export default {
             i++; //  increment the counter
             // console.log(lastTime[0]);
 
-            // console.log(typeof _this.$parent.$parent.$parent.$refs.audioPlayer.currentTime);
+            // console.log(typeof _this.$refs.audioPlayer.currentTime);
             if (i < 10000) {
               //  if the counter < 10, call the loop function
               myLoop(); //  ..  again which will trigger another
@@ -178,7 +138,7 @@ export default {
   },
   methods: {
     startNewSong(next) {
-      this.$parent.$parent.$parent.$refs.audioPlayer.pause();
+      this.$refs.audioPlayer.pause();
       setTimeout(next, 700);
     },
     initChart() {
@@ -186,40 +146,28 @@ export default {
     },
     getEmptyChart() {
       return {
-        labels: Array(100).fill(0.01),
+        labels: Array(100).fill(0.005),
         datasets: [
           {
             backgroundColor: "#c774f7",
-            data: Array(100).fill(0.01),
+            data: Array(100).fill(0.005),
           },
         ],
       };
+    },
+    handleBeforePlay(next) {
+      // There are a few things you can do here...
+      this.currentAudioName =
+        this.audioList[this.$refs.audioPlayer.currentPlayIndex].name;
+
+      next(); // Start playing
     },
   },
 };
 </script>
 
-<style lang="scss">
-@keyframes scroll {
-  from {
-    transform: translateX(0%);
-  }
-  to {
-    transform: translateX(-50%);
-  }
-}
-
-.logo-wall {
-  display: flex;
-
-  .logo-wrapper {
-    display: flex;
-    animation: scroll 100s linear infinite;
-
-    // &:nth-child(2) {
-    //   animation: scroll2 10s linear infinite;
-    //   animation-delay: -5s;
-    // }
-  }
+<style>
+.main {
+  min-height: 70vh;
 }
 </style>
