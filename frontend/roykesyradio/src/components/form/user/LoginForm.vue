@@ -89,12 +89,6 @@ export default {
         })
         .then(async (response) => {
           if (response.data.success == 1) {
-            await this.$axios
-              .get(apiAddress + "/user/test", {})
-              .then((response) => {
-                console.log(response);
-              });
-
             this.$cookies.set("username", response.data.data.username);
             this.$cookies.set("nickname", response.data.data.nickname);
             this.$toast.success("Login Success!\nRedirecting to home page", {

@@ -1,225 +1,435 @@
 <template>
-  <div class="home pa-10" style="overflow-y: scroll">
-    <!-- <v-container class="pa-0 ma-0">
-      <v-row style="height: 89vh; width: 90vw" justify="center"> -->
-    <!-- {{ currentAudioName || audioList[0].name }} -->
-    <!-- <v-row> </v-row> -->
-    <v-row
-      style="height: 85vh; width: 80vw; overflow-x: hidden"
-      justify="center"
-      class="d-flex flex-column"
-    >
-      <div
-        class="d-flex align-start justify-center pa-0 ma-10 flex-column"
-        style="height: 60vh; width: 10vw"
-      >
-        <div class="logo-wall" style="width: 30vw">
-          <div class="logo-wrapper first">
-            <div
-              class="mt-0 mb-10 font-weight-thin text-h2"
-              style="white-space: nowrap"
-            >
-              <span class="mr-5" v-for="i in 20" :key="i">
-                One last kiss / 宇多田光
-                &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-              </span>
-            </div>
+  <div class="pa-0" style="overflow-y: hidden; overflow-x: hidden">
+    <div style="overflow-y: hidden; overflow-x: hidden">
+      <v-row class="mt-5 ml-10" style="width: 80vw">
+        <v-col cols="12" class="font-weight-thin text-h2 py-10">
+          <div class="mb-5">Music not in the platform?</div>
+          <div class="text-h1 primary--text">Add it right now!</div>
+        </v-col>
+        <v-col cols="12" class="d-flex align-center pl-15 ma-0">
+          <div class="arrow mr-0 my-auto">
+            <span></span>
+            <span></span>
+            <span></span>
           </div>
-          <!-- <div class="logo-wrapper second">
-            <div
-              class="mt-0 mb-10 font-weight-thin text-h2"
-              style="white-space: nowrap"
-            >
-              One last kiss / 宇多田光
-            </div>
-          </div> -->
-        </div>
+          <v-dialog v-model="addNewMusicDialog" width="500">
+            <template v-slot:activator="{ on, attrs }">
+              <v-btn color="primary" x-large outlined v-bind="attrs" v-on="on">
+                Add new music
+              </v-btn>
+            </template>
 
-        <div class="mb-0">
-          <div class="d-flex align-center justify-center">
-            <v-img
-              src="@/assets/image/headphone.jpg"
-              min-width="20vw"
-              max-width="20vw"
-              max-height="20vw"
-              min-height="20vw"
-              :aspect-ratio="1 / 1"
-            ></v-img>
+            <v-card class="pa-10">
+              <div class="text-h4 pa-5 pb-0 primary--text">Add New Music</div>
 
-            <!-- {{ currentAudioName || audioList[0].name }} -->
+              <v-divider class="my-5"></v-divider>
 
-            <bar-chart
-              style="height: 30vh; width: 55vw"
-              class="my-auto px-10"
-              :chartData="chartData"
-            />
-          </div>
-        </div>
-        <div class="mt-5 mb-10 font-weight-thin text-h5"></div>
+              <div>
+                <v-form
+                  ref="addMusicForm"
+                  v-model="addMusicValid"
+                  lazy-validation
+                >
+                  <v-row class="pa-3 d-flex align-center">
+                    <v-col cols="6" class="text-h6 secondary--text">
+                      Music name
+                    </v-col>
+                    <v-col cols="6">
+                      <v-text-field
+                        v-model="musicName"
+                        label="Music Name"
+                        :rules="[rules.required, rules.musicName]"
+                        clearable
+                      ></v-text-field
+                    ></v-col>
+                  </v-row>
+                  <v-row class="pa-3 d-flex align-center">
+                    <v-col cols="6" class="text-h6 secondary--text"
+                      >Upload image</v-col
+                    >
+                    <v-col cols="6"
+                      ><v-file-input
+                        v-model="coverName"
+                        accept="image/png, image/jpeg"
+                        placeholder="Pick cover picture"
+                        prepend-icon=""
+                        append-icon="mdi-camera"
+                        label="Cover Picture"
+                        :rules="[rules.required]"
+                        @change="uploadMusicImage"
+                      ></v-file-input
+                    ></v-col>
+                  </v-row>
+                  <v-row class="pa-3 d-flex align-center">
+                    <v-col cols="6" class="text-h6 secondary--text"
+                      >Upload file</v-col
+                    >
+                    <v-col cols="6"
+                      ><v-file-input
+                        v-model="fileName"
+                        accept=".mp3, .wav"
+                        placeholder="Pick cover picture"
+                        prepend-icon=""
+                        append-icon="mdi-music"
+                        label="Music"
+                        :rules="[rules.required]"
+                        @change="uploadMusic"
+                      ></v-file-input
+                    ></v-col>
+                  </v-row>
+                </v-form>
+              </div>
+
+              <v-divider></v-divider>
+
+              <v-card-actions>
+                <v-spacer></v-spacer>
+                <v-btn color="primary" text @click="addNewMusicDialog = false">
+                  Cancel
+                </v-btn>
+                <v-btn
+                  color="primary"
+                  text
+                  @click="addNewMusic"
+                  :loading="isLoading"
+                  >upload
+                </v-btn>
+              </v-card-actions>
+            </v-card>
+          </v-dialog>
+        </v-col>
+      </v-row>
+      <v-divider class="my-5"></v-divider>
+      <div class="ma-0 pa-5">
+        <v-row class="ma-15 mt-5">
+          <v-col
+            v-for="(value, key) in musicInfo"
+            :key="key"
+            cols="3"
+            class="pa-5"
+          >
+            <v-card>
+              <v-img
+                :src="apiAddress + '/music/cover/' + key.toString()"
+                :aspect-ratio="1 / 1"
+              ></v-img>
+              <v-card-title
+                primary-title
+                style="height: 100px; position: relative"
+              >
+                <div>
+                  <div class="text-h6 text-truncate" style="width: 12vw">
+                    {{ musicInfo[key].music_name }}
+                  </div>
+                  <div class="subtitle-1 text-truncate" style="width: 12vw">
+                    {{ musicInfo[key].nickname }}
+                  </div>
+                  <div
+                    style="position: absolute; right: 0px; top: -20px"
+                    class="px-5"
+                  >
+                    <v-btn
+                      :color="favoriteColor(key)"
+                      dark
+                      small
+                      fab
+                      class="mr-3"
+                      @click="toggleFavorite(key)"
+                    >
+                      <v-icon>mdi-heart</v-icon>
+                    </v-btn>
+                    <v-btn
+                      color="#78cc58"
+                      dark
+                      small
+                      fab
+                      class="mr-3"
+                      @click="addToQueue(key)"
+                    >
+                      <v-icon>mdi-plus</v-icon>
+                    </v-btn>
+                    <v-btn
+                      color="primary"
+                      dark
+                      small
+                      fab
+                      @click="cutInQueue(key)"
+                    >
+                      <v-icon>mdi-play</v-icon>
+                    </v-btn>
+                  </div>
+                </div>
+              </v-card-title>
+            </v-card>
+          </v-col>
+        </v-row>
       </div>
-    </v-row>
+    </div>
   </div>
 </template>
-
 <script>
-// @ is an alias to /src
-// import HelloWorld from "@/components/HelloWorld.vue";
-import BarChart from "@/components/BarChart.vue";
-// import AudioPlayer from "@liripeng/vue-audio-player";
+import { rules } from "@/jsLibrary/rules.js";
 import { apiAddress } from "@/config.js";
+import Vue from "vue";
 
 export default {
   name: "HomeView",
-  components: {
-    BarChart,
+  components: {},
+  data() {
+    return {
+      rules: rules,
+      addNewMusicDialog: false,
+      addMusicValid: false,
+      coverPicture: null,
+      musicFile: null,
+      musicName: "",
+      isLoading: false,
+      totalMusicCount: 0,
+      apiAddress: apiAddress,
+      musicInfo: {},
+      coverName: "",
+      fileName: "",
+      idList: [],
+    };
   },
   async mounted() {
-    console.log(apiAddress);
+    let _this = this;
     await this.$axios
-      .get(apiAddress + "/music/audio_wave/")
-      .then((response) => {
-        // console.log(response);
-        // this.chartData.labels = response.data.wave[0];
-        // this.chartData.datasets = [{ data: response.data.wave[0] }];
-        let lastTime = NaN;
-
-        let i = 0;
-        let _this = this;
-        let frameCount = 0;
-        let secondFreq = 20;
-
-        function myLoop() {
-          //  create a loop function
-          setTimeout(function () {
-            if (
-              _this.$parent.$parent.$parent.$refs.audioPlayer.currentTime === ""
-            ) {
-              _this.initChart();
-              myLoop();
-              return;
-            }
-            // console.log(_this.$parent.$parent.$parent.$refs.audioPlayer.isPlaying);
-            if (
-              _this.$parent.$parent.$parent.$refs.audioPlayer.isPlaying != true
-            ) {
-              _this.initChart();
-              myLoop();
-              return;
-            }
-            //  call a 3s setTimeout when the loop is called
-            // console.log(_this.chartData);
-            let currentTime = Math.ceil(
-              _this.$parent.$parent.$parent.$refs.audioPlayer.currentTime
-            );
-            if (isNaN(lastTime)) {
-              lastTime = currentTime;
-            } else if (lastTime != currentTime) {
-              frameCount = 0;
-            } else if (lastTime == currentTime) {
-              frameCount++;
-            }
-            lastTime = currentTime;
-
-            frameCount = Math.min(frameCount, secondFreq);
-
-            // console.log(currentTime, frameCount);
-            if (
-              currentTime * secondFreq + frameCount >=
-              response.data.wave.length
-            ) {
-              myLoop();
-              return;
-            }
-
-            let wave =
-              response.data.wave[currentTime * secondFreq + frameCount];
-            // wave = wave.slice().reverse().concat(wave);
-
-            for (let index = 0; index < wave.length; ++index)
-              wave[index] += 0.005;
-
-            _this.chartData.labels = wave;
-            _this.chartData.datasets = [{ data: wave }];
-            i++; //  increment the counter
-            // console.log(lastTime[0]);
-
-            // console.log(typeof _this.$parent.$parent.$parent.$refs.audioPlayer.currentTime);
-            if (i < 10000) {
-              //  if the counter < 10, call the loop function
-              myLoop(); //  ..  again which will trigger another
-            } //  ..  setTimeout()
-          }, 1000 / secondFreq);
+      .get(apiAddress + "/music/all_id_list")
+      .then(async (response) => {
+        _this.idList = response.data;
+        _this.musicInfo = {};
+        for (let i = 0; i < _this.idList.length; i++) {
+          _this.musicInfo[_this.idList[i]] = {
+            username: "",
+            nickname: "",
+            music_name: "",
+            favorite: false,
+          };
+          _this.musicInfo[this.idList[i]] = await this.returnMusicInfo(
+            this.idList[i]
+          );
+          this.$forceUpdate();
         }
-
-        myLoop();
       })
       .catch((error) => {
         console.log(error);
       });
 
-    // console.log(BarChart.chartData);
-    // this.chartData.labels = as
-  },
-  data() {
-    return {
-      currentAudioName: "",
-      chartData: this.getEmptyChart(),
-      audioList: [
-        {
-          name: "audio1",
-          url: apiAddress + "/static/one_last_kiss.wav",
-        },
-        {
-          name: "audio2",
-          url: apiAddress + "/static/the_edge.wav",
-        },
-      ],
-    };
+    // console.log("hey", this.musicInfo);
+
+    await this.$axios
+      .get(apiAddress + "/user/favorite_list")
+      .then(async (response) => {
+        console.log(response.data);
+        if (response.data.success == 1) {
+          let favoriteList = response.data.data;
+          for (let i = 0; i < favoriteList.length; i++) {
+            let musicId = favoriteList[i];
+            if (!(musicId in this.musicInfo)) continue;
+            let data = this.musicInfo[musicId];
+            data.favorite = true;
+            Vue.set(this.musicInfo, musicId, data);
+            // console.log("what", this.musicInfo);
+            _this.$forceUpdate();
+          }
+        } else {
+          if (response.data.msg.indexOf("auth") != -1) {
+            this.$router.push("/login");
+
+            this.$toast.error(response.data.msg, {
+              position: "top-center",
+              timeout: 2000,
+            });
+          }
+        }
+        this.musicInfo = Array(parseInt(response.data)).fill({
+          username: "",
+          nickname: "",
+          music_name: "",
+          favorite: false,
+        });
+        this.totalMusicCount = parseInt(response.data);
+      })
+      .catch((error) => {
+        console.log(error);
+      });
   },
   methods: {
-    startNewSong(next) {
-      this.$parent.$parent.$parent.$refs.audioPlayer.pause();
-      setTimeout(next, 700);
+    favoriteColor: function (id) {
+      console.log(this.musicInfo[id]);
+      if (!this.musicInfo[id].favorite) return "pink lighten-4";
+      else return "pink";
     },
-    initChart() {
-      this.chartData = this.getEmptyChart();
+    toggleFavorite: async function (id) {
+      let data = this.musicInfo[id];
+      data.favorite = !data.favorite;
+      this.$forceUpdate();
+
+      await this.$axios
+        .post(apiAddress + "/user/update_favortie_music", {
+          method: data.favorite ? "add" : "remove",
+          music_id: id,
+        })
+        .then((response) => {
+          if (
+            response.data.success != 1 &&
+            response.data.msg.indexOf("auth") != -1
+          ) {
+            this.$router.push("/login");
+
+            this.$toast.error(response.data.msg, {
+              position: "top-center",
+              timeout: 2000,
+            });
+          }
+        })
+        .catch((error) => {
+          console.log(error);
+        });
+
+      Vue.set(this.musicInfo, id, data);
     },
-    getEmptyChart() {
-      return {
-        labels: Array(100).fill(0.01),
-        datasets: [
+    addToQueue: function (id) {
+      this.$parent.$parent.$parent.addToQueue(id);
+    },
+    cutInQueue: function (id) {
+      this.$parent.$parent.$parent.cutInQueue(id);
+    },
+    returnMusicInfo: async function (id) {
+      let data = null;
+      await this.$axios
+        .get(apiAddress + "/music/info/" + id.toString())
+        .then(async (response) => {
+          // console.log(response.data);
+          data = response.data;
+        })
+        .catch((error) => {
+          console.log(error);
+        });
+
+      return data;
+    },
+    uploadMusicImage: function (file) {
+      const reader = new FileReader();
+      reader.addEventListener("load", (e) => {
+        this.coverPicture = e.target.result;
+      });
+      reader.addEventListener("error", () => {
+        this.$toast.error("Uplaod image error", {
+          position: "top-center",
+          timeout: 2000,
+        });
+      });
+      reader.readAsDataURL(file);
+    },
+    uploadMusic: function (file) {
+      const reader = new FileReader();
+      reader.addEventListener("load", (e) => {
+        this.musicFile = e.target.result;
+      });
+      reader.addEventListener("error", () => {
+        this.$toast.error("Uplaod file error", {
+          position: "top-center",
+          timeout: 2000,
+        });
+      });
+      reader.readAsDataURL(file);
+    },
+    requestAddMusic: async function () {
+      await this.$axios
+        .post(
+          apiAddress + "/music/upload_music",
           {
-            backgroundColor: "#c774f7",
-            data: Array(100).fill(0.01),
+            music_name: this.musicName,
+            cover: this.coverPicture,
+            music: this.musicFile,
           },
-        ],
-      };
+          {
+            timeout: 1000 * 60 * 5,
+          }
+        )
+        .then((response) => {
+          if (response.data.success == 1) {
+            this.$toast.success("Register Success!\nRedirecting to home page", {
+              position: "top-center",
+              timeout: 2000,
+            });
+          } else {
+            if (response.data.msg.indexOf("auth") != -1) {
+              this.$router.push("/login");
+            }
+            this.$toast.error(response.data.msg, {
+              position: "top-center",
+              timeout: 2000,
+            });
+          }
+        })
+        .catch((error) => {
+          this.$toast.error(String(error), {
+            position: "top-center",
+            timeout: 2000,
+          });
+          console.log(error);
+        });
+    },
+    addNewMusic: async function () {
+      if (this.$refs.addMusicForm.validate() == false) {
+        return;
+      }
+
+      this.requestAddMusic();
+      this.addNewMusicDialog = false;
+      this.coverPicture = null;
+      this.musicFile = null;
+      this.musicName = "";
+      this.coverName = "";
+      this.fileName = "";
+      this.$refs.addMusicForm.reset();
+      this.$toast.info(
+        "Already send request\nMight take several minutes to upload to server",
+        {
+          position: "top-center",
+          timeout: 2000,
+        }
+      );
     },
   },
 };
 </script>
 
-<style lang="scss">
-@keyframes scroll {
-  from {
-    transform: translateX(0%);
-  }
-  to {
-    transform: translateX(-50%);
-  }
+<style scope>
+.arrow {
+  transform: translate(-50%, -50%);
 }
-
-.logo-wall {
-  display: flex;
-
-  .logo-wrapper {
-    display: flex;
-    animation: scroll 100s linear infinite;
-
-    // &:nth-child(2) {
-    //   animation: scroll2 10s linear infinite;
-    //   animation-delay: -5s;
-    // }
+.arrow span {
+  display: inline-block;
+  width: 30px;
+  height: 30px;
+  border-bottom: 5px solid #9df07d;
+  border-right: 5px solid #c774f7;
+  margin: -5px;
+  position: relative;
+  top: 17px;
+  animation: animate 2s infinite;
+}
+.arrow span:nth-child(2) {
+  animation-delay: -0.2s;
+}
+.arrow span:nth-child(3) {
+  animation-delay: -0.4s;
+}
+@keyframes animate {
+  0% {
+    opacity: 0;
+    transform: rotate(-45deg) translate(-20px, -20px);
+  }
+  50% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+    transform: rotate(-45deg) translate(0px, 0px);
   }
 }
 </style>

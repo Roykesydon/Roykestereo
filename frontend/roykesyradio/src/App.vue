@@ -19,65 +19,70 @@
         <div>
           <v-divider class="secondary"></v-divider>
         </div>
-        <div class="d-flex justify-center my-3">
-          <v-btn
-            text
-            class="my-3 mx-3 primary--text font-weight-thin text-h5"
-            x-large
-            :disabled="!isLogin"
-            @click="
-              () => {
-                this.$router.push('/');
-              }
-            "
-            >Home</v-btn
-          >
+        <div
+          class="d-flex justify-start my-3 pl-5 pointer"
+          @click="
+            () => {
+              this.$router.push('/');
+            }
+          "
+        >
+          <v-icon color="primary">mdi-home</v-icon>
+          <div class="my-3 ml-3 px-0 primary--text font-weight-thin text-h5">
+            Home
+          </div>
         </div>
         <div>
           <v-divider class="secondary"></v-divider>
         </div>
-        <div class="d-flex justify-center my-3">
-          <v-btn
-            text
-            class="my-3 mx-3 primary--text font-weight-thin text-h5"
-            x-large
-            :disabled="!isLogin"
-            @click="
-              () => {
-                this.$router.push('/song_list');
-              }
-            "
-          >
-            Song <br />list
-          </v-btn>
-        </div>
-        <div>
-          <v-divider class="secondary"></v-divider>
-        </div>
-
-        <div class="d-flex justify-center my-3">
-          <v-btn
-            text
-            class="my-3 mx-3 primary--text font-weight-thin text-h5"
-            x-large
-            :disabled="!isLogin"
-            >Current <br />
-            playing</v-btn
-          >
+        <div
+          class="d-flex justify-start my-3 pl-5 pointer"
+          @click="
+            () => {
+              this.$router.push('/favorite_playlist');
+            }
+          "
+        >
+          <v-icon color="primary">mdi-heart</v-icon>
+          <div class="my-3 ml-3 px-0 primary--text font-weight-thin text-h5">
+            Favorite <br />Playlist
+          </div>
         </div>
         <div>
           <v-divider class="secondary"></v-divider>
         </div>
 
-        <div class="d-flex justify-center my-3">
-          <v-btn
-            text
-            class="my-3 mx-3 primary--text font-weight-thin text-h5"
-            x-large
-            :disabled="!isLogin"
-            >Chat<br />
-            room</v-btn
-          >
+        <div
+          class="d-flex justify-start my-3 pl-5 pointer"
+          @click="
+            () => {
+              this.$router.push('/current_playing');
+            }
+          "
+        >
+          <v-icon color="primary">mdi-disc</v-icon>
+          <div class="my-3 ml-3 px-0 primary--text font-weight-thin text-h5">
+            Current <br />
+            Playing
+          </div>
+        </div>
+        <div>
+          <v-divider class="secondary"></v-divider>
+        </div>
+
+        <div
+          class="d-flex justify-start my-3 pl-5 pointer"
+          @click="
+            () => {
+              this.$router.push('/');
+            }
+          "
+        >
+          <v-icon color="primary">mdi-party-popper</v-icon>
+          <div class="my-3 ml-3 px-0 primary--text font-weight-thin text-h5">
+            Chat<br />
+            Room
+          </div>
         </div>
         <div>
           <v-divider class="secondary"></v-divider>
@@ -108,23 +113,20 @@
           </v-btn>
         </div>
       </v-col>
-      <!-- <v-col
-        col="2"
-        style="background-color: #1a1a1a"
-        class="d-flex align-start flex-column"
-      >
-        <div class="pa-2">test</div>
-        <div class="mt-auto"><v-img></v-img></div>
-      </v-col> -->
+
       <v-col cols="10" class="pa-0 ma-3">
         <v-main>
-          <div class="home">
+          <div class="">
             <v-container class="pa-0 ma-0">
               <v-row
-                style="height: 89vh; width: 85vw; overflow: hidden"
+                style="height: 89vh; width: 85vw; overflow-x: hidden"
                 justify="center"
+                class="route"
               >
-                <router-view style="overflow: hidden" />
+                <router-view
+                  :currentMusicId="currentMusicId"
+                  style="overflow-y: hidden; overflow-x: hidden"
+                />
               </v-row>
 
               <v-row
@@ -135,14 +137,13 @@
                 <div style="width: 60vw">
                   <audio-player
                     ref="audioPlayer"
-                    :audio-list="audioList.map((elm) => elm.url)"
-                    theme-color="#9df07d"
+                    :progress-interval="1000 / 25"
+                    :audio-list="audioList"
+                    theme-color="#c774f7"
                     :pause="initChart"
-                    :ended="initChart"
-                    :play-prev="initChart"
-                    :play-next="initChart"
-                    :before-prev="startNewSong"
-                    :before-next="startNewSong"
+                    :ended="nextMusic"
+                    :before-prev="prevMusic"
+                    :before-next="nextMusic"
                   />
                 </div>
               </v-row>
@@ -158,6 +159,7 @@
 import { clearUserInformationCookies } from "@/jsLibrary/cookies.js";
 import AudioPlayer from "@liripeng/vue-audio-player";
 import { apiAddress } from "@/config.js";
+// import Vue from "vue";
 
 export default {
   name: "App",
@@ -171,16 +173,10 @@ export default {
   },
   data: () => ({
     currentAudioName: "",
-    audioList: [
-      {
-        name: "audio1",
-        url: apiAddress + "/static/one_last_kiss.wav",
-      },
-      {
-        name: "audio2",
-        url: apiAddress + "/static/the_edge.wav",
-      },
-    ],
+    musicNextQueue: [],
+    musicPrevStack: [],
+    currentMusicId: "",
+    audioList: [],
   }),
 
   computed: {
@@ -193,21 +189,85 @@ export default {
   },
 
   methods: {
+    addToQueue(id) {
+      if (id != this.currentMusicId) {
+        this.musicNextQueue.push(id);
+      }
+      if (this.currentMusicId == "") {
+        this.$refs.audioPlayer.playNext();
+      }
+    },
+
+    cutInQueue(id) {
+      if (id != this.currentMusicId) {
+        this.musicNextQueue.unshift(id);
+        this.$refs.audioPlayer.playNext();
+      }
+    },
+
     signOut: function () {
       clearUserInformationCookies(this);
       this.$toast.info("Successfully logged out", {
         position: "top-center",
         timeout: 2000,
       });
-      setTimeout(() => {
-        this.$router.push("/login");
-      }, 2000);
+
+      this.$router.push("/login");
     },
 
-    startNewSong(next) {
-      this.$refs.audioPlayer.pause();
-      setTimeout(next, 700);
+    nextMusic(next) {
+      if (this.currentMusicId != "")
+        this.musicPrevStack.push(this.currentMusicId);
+      console.log(this.musicNextQueue);
+      if (this.musicNextQueue.length != 0) {
+        this.currentMusicId = this.musicNextQueue[0];
+        this.audioList = [
+          apiAddress + "/music/audio/" + this.currentMusicId.toString(),
+        ];
+        // Vue.set(
+        //   this.audioList,
+        //   0,
+        //   apiAddress + "/music/audio/" + this.musicNextQueue[0].toString()
+        // );
+
+        // this.musicPrevStack.push(this.musicNextQueue[0]);
+        this.musicNextQueue.shift();
+
+        this.$refs.audioPlayer.pause();
+        this.$refs.audioPlayer.currentTime = 0;
+        setTimeout(next, 700);
+      } else {
+        this.audioList = [""];
+        this.currentMusicId = "";
+      }
     },
+
+    prevMusic(next) {
+      if (this.currentMusicId != "")
+        this.musicNextQueue.unshift(this.currentMusicId);
+      if (this.musicPrevStack.length != 0) {
+        this.currentMusicId =
+          this.musicPrevStack[this.musicPrevStack.length - 1];
+
+        this.audioList = [
+          apiAddress + "/music/audio/" + this.currentMusicId.toString(),
+        ];
+
+        this.musicPrevStack.pop();
+        this.$refs.audioPlayer.pause();
+        this.$refs.audioPlayer.currentTime = 0;
+        setTimeout(next, 700);
+      } else {
+        this.audioList = [""];
+        this.currentMusicId = "";
+      }
+      console.log(
+        this.musicPrevStack,
+        this.currentMusicId,
+        this.musicNextQueue
+      );
+    },
+
     initChart() {
       this.chartData = this.getEmptyChart();
     },
@@ -225,3 +285,53 @@ export default {
   },
 };
 </script>
+
+<style scope>
+.v-btn:before {
+  opacity: 0 !important;
+}
+
+.v-ripple__container {
+  opacity: 0 !important;
+}
+
+.route {
+  /* background-image: linear-gradient(
+    to right top,
+    #2c1732,
+    #23162b,
+    #1b1523,
+    #15131a,
+    #0f0f0f
+  ); */
+  /* background-image: linear-gradient(
+    to right top,
+    #150a18,
+    #110915,
+    #0d0811,
+    #08070c,
+    #050505
+  ); */
+  background-image: linear-gradient(
+    to right top,
+    #0f0811,
+    #0c070f,
+    #09070c,
+    #070609,
+    #050505
+  );
+}
+
+::-webkit-scrollbar {
+  display: none;
+}
+
+.pointer {
+  cursor: pointer;
+}
+.pointer:hover {
+  border-radius: 25px;
+
+  background-color: #2d1839;
+}
+</style>

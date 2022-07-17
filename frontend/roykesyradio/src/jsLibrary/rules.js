@@ -12,6 +12,12 @@ export const rules = {
       "Must be between 6-30 characters"
     );
   },
+  musicName: (v) => {
+    return (
+      (v != null && v.length >= 1 && v.length <= 50) ||
+      "Must be between 1-50 characters"
+    );
+  },
   arrayRequired: (v) => {
     return v.length > 0 || "required";
   },

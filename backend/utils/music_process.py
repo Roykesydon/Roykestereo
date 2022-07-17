@@ -12,7 +12,7 @@ import matplotlib.pyplot as plt
 def wav_to_bins(
     sample_rate,
     origin_data,
-    song_name,
+    file_path,
     bin_count=100,
     second_freq=20,
     max_hz=2000,
@@ -24,7 +24,6 @@ def wav_to_bins(
     flag = True
 
     for current_second in range(duration):
-        print(current_second)
         for i in range(second_freq):
 
             if len(origin_data.shape) == 1:
@@ -74,15 +73,15 @@ def wav_to_bins(
 
             bins.append(histogram)
 
-            if flag:
-                plt.subplot(211)
-                plt.plot(b, "b")
-                plt.title("time line")
-                plt.subplot(212)
-                plt.plot(histogram, "r")
-                plt.title("fft")
-                plt.savefig("img2.jpg")
-                flag = False
+            # if flag:
+            #     plt.subplot(211)
+            #     plt.plot(b, "b")
+            #     plt.title("time line")
+            #     plt.subplot(212)
+            #     plt.plot(histogram, "r")
+            #     plt.title("fft")
+            #     plt.savefig("img2.jpg")
+            #     flag = False
 
     bins = [[math.log2(bin + 1) for bin in hist] for hist in bins]
 
@@ -99,7 +98,7 @@ def wav_to_bins(
     min_bins = [min(hist) for hist in bins]
     bins = [[bin - min_bin for bin in hist] for min_bin, hist in zip(min_bins, bins)]
 
-    with open(f"{song_name}.pickle", "wb") as f:
+    with open(file_path, "wb") as f:
         pickle.dump(bins, f)
 
 
