@@ -9,9 +9,8 @@ A cloud music platform with chat room function
     2. 取 0 ~ 2000 Hz
     3. 取 log
     2. 歸一化
-    
 
-<img src="./demo/banner.gif" width="100%">
+![](./demo/banner2.gif)
 
 ## demo
 ### Home
