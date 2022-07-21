@@ -51,22 +51,4 @@ export const rules = {
   files: (v) => {
     return v.length > 0 || "Please uplaod picture";
   },
-  parentClass: (v) => {
-    return (
-      (v != null && v.length >= 1 && v.length <= 25) ||
-      "Must be between 1-25 characters"
-    );
-  },
-  subClass: (v) => {
-    return (
-      (v != null && v.length >= 1 && v.length <= 25) ||
-      "Must be between 1-25 characters"
-    );
-  },
-  buyCount: (v) => {
-    return (v != null && v >= 1 && v <= 500) || "Must be between 1-500";
-  },
-  name: (v) => {
-    return (v != null && v.length <= 40) || "Input at most 40 characters";
-  },
 };

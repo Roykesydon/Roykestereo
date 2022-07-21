@@ -1,10 +1,9 @@
-import pymongo
+import os
 
-from .config import get_env
+import pymongo
 
 
 def get_connection() -> pymongo.mongo_client.MongoClient:
-    env_dict = get_env()
-    uri = f"mongodb://{env_dict['DB_USERNAME']}:{env_dict['DB_PASSWORD']}@192.168.100.158:27119"
+    uri = f"mongodb://{os.environ['DB_USER']}:{os.environ['DB_PASSWORD']}@{os.environ['DB_HOST']}"
     client = pymongo.MongoClient(uri)
     return client

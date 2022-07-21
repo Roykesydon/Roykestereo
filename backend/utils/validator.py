@@ -48,6 +48,5 @@ class Validator:
         if input is None or len(input) < 6 or len(input) > 30:
             self._errors.append("Password format is wrong")
 
-
     def get_errors(self):
         return self._errors

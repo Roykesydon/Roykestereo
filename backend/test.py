@@ -1,6 +1,6 @@
-from utils.music_process import wav_to_bins
 from scipy.io import wavfile
 
+from utils.music_process import wav_to_bins
 
 sample_rate, data = wavfile.read("./static/one_last_kiss.wav")
 # sample_rate, data = wavfile.read("./static/beautiful_world.wav")

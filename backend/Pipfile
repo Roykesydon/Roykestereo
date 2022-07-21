@@ -12,6 +12,8 @@ pymongo = "*"
 flask-socketio = "*"
 simple-websocket = "*"
 flask-session = "*"
+gunicorn = "*"
+importlib = "*"
 
 [dev-packages]
 

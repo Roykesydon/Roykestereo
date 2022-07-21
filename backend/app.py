@@ -1,29 +1,35 @@
-from distutils.log import debug
-from flask import Flask, Response, render_template, session
-from flask_cors import CORS
-from scipy.io import wavfile
-from scipy.fftpack import fft
-
-from flask_session import Session
-from flask_socketio import SocketIO
 import os
 from datetime import timedelta
+from distutils.log import debug
+
+import matplotlib.pyplot as plt
+from flask import Flask, Response, render_template, session
+from flask_cors import CORS
+from flask_session import Session
+from flask_socketio import SocketIO
+from scipy.fftpack import fft
+from scipy.io import wavfile
 
 from music.api import music
 from user.api import user
 
-import matplotlib.pyplot as plt
 
-app = Flask(__name__, static_folder="static")
-CORS(app, supports_credentials=True)
+def create_app():
+    app = Flask(__name__, static_folder="static")
+    CORS(app, supports_credentials=True)
 
-app.config["SECRET_KEY"] = os.urandom(24)
-app.config["PERMANENT_SESSION_LIFETIME"] = timedelta(days=1)
+    app.config["SECRET_KEY"] = os.urandom(24)
+    app.config["PERMANENT_SESSION_LIFETIME"] = timedelta(days=1)
 
-app.register_blueprint(music, url_prefix="/music")
-app.register_blueprint(user, url_prefix="/user")
+    app.register_blueprint(music, url_prefix="/music")
+    app.register_blueprint(user, url_prefix="/user")
 
-socketio = SocketIO(app, cors_allowed_origins="*")
+    socketio = SocketIO(app, cors_allowed_origins="*")
+
+    return socketio, app
+
+
+socketio, app = create_app()
 
 
 @app.route("/audio_visualize")

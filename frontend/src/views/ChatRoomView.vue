@@ -1,10 +1,13 @@
 <template>
   <div class="pa-10 d-flex align-center flex-column" style="overflow-x: hidden">
-    <v-card class="pa-0" fill-height>
+    <v-card class="pa-0" fill-height elevation="12">
       <v-card-title
-        class="primary_dark primary--text text-h4 pa-7 font-weight-bold"
+        class="primary_dark primary--text text-h4 pa-7 font-weight-bold d-flex align-center"
       >
-        Chat Room
+        <v-icon color="primary" size="30" class="mr-5"
+          >mdi-account-voice</v-icon
+        >
+        <div>Chat Room</div>
       </v-card-title>
       <!-- <v-divider></v-divider> -->
       <v-card-text
@@ -17,32 +20,34 @@
         "
       >
         <v-row
-          class="flex-column"
+          class="flex-column mx-5"
           v-for="(message, index) in messages"
           :align="messageAlign(message)"
           :key="index"
         >
-          <div v-if="message.join == true">
+          <div v-if="message.join == true" class="mb-4">
             <v-card
-              class="grey darken-4 py-1 px-3 my-2 primary--text text-subtitle-2 rounded-pill"
+              class="grey darken-4 py-1 px-3 my-0 secondary--text text-subtitle-2 rounded-pill"
             >
               {{ message.nickname }}@{{ message.username }} joined
             </v-card>
           </div>
-          <div v-if="message.join == false">
-            <div :class="idJustify(message.self)">
+          <div v-if="message.join == false" class="mb-10">
+            <v-row :class="idJustify(message.self)">
               <span class="text-h6 font-weight-thin primary--text">{{
                 message.nickname
               }}</span>
               <span class="text-h6 font-weight-thin grey--text"
                 >@{{ message.username }}</span
               >
-            </div>
-            <v-card
-              class="grey darken-4 py-1 px-3 primary--text text-wrap"
-              width="20vw"
-              ><div>{{ message.msg }}</div></v-card
-            >
+            </v-row>
+            <v-row :class="idJustify(message.self)">
+              <v-card
+                class="grey darken-4 py-1 px-3 primary--text text-wrap"
+                max-width="20vw"
+                >{{ message.msg }}</v-card
+              >
+            </v-row>
           </div>
         </v-row>
       </v-card-text>
@@ -51,11 +56,14 @@
           v-model="message"
           label="Input Message"
           class="ml-2"
+          color="primary"
           outlined
           dense
           hide-details
         ></v-text-field>
-        <v-btn class="mx-3 primary" @click="sendMessage"> end</v-btn>
+        <v-btn color="primary" outlined class="mx-3" @click="sendMessage">
+          send</v-btn
+        >
       </v-card-actions>
     </v-card>
   </div>

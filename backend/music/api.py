@@ -1,15 +1,17 @@
 import base64
 import hashlib
 import os
-import subprocess
 import pickle
+import subprocess
+from time import time
+
+from bson import ObjectId
+from flask import Blueprint, jsonify, request, send_from_directory, session
 from flask_cors import CORS
 from scipy.io import wavfile
-from flask import Blueprint, request, session, send_from_directory, jsonify
-from utils.music_process import wav_to_bins
+
 from utils.database import get_connection
-from bson import ObjectId
-from time import time
+from utils.music_process import wav_to_bins
 
 music = Blueprint("music", __name__)
 CORS(music, supports_credentials=True)

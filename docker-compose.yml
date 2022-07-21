@@ -5,36 +5,66 @@ services:
     image: mongo:4.2.12
     container_name: roykestereo-mongodb
     restart: always
-    networks: 
+    networks:
       - roykestereo-network
     environment:
-      MONGO_INITDB_ROOT_USERNAME: ${DB_USERNAME} 
+      MONGO_INITDB_ROOT_USERNAME: ${DB_USERNAME}
       MONGO_INITDB_ROOT_PASSWORD: ${DB_PASSWORD}
     ports:
       - 27119:27017
-    volumes: 
+    volumes:
       - mongodata:/data/db
-  
+
   mongo-express:
     image: mongo-express:latest
     container_name: roykestereo-mongo-express
     restart: always
     ports:
       - 8085:8081
-    networks: 
+    networks:
       - roykestereo-network
     environment:
-      ME_CONFIG_MONGODB_ADMINUSERNAME: ${DB_USERNAME} 
+      ME_CONFIG_MONGODB_ADMINUSERNAME: ${DB_USERNAME}
       ME_CONFIG_MONGODB_ADMINPASSWORD: ${DB_PASSWORD}
-      ME_CONFIG_MONGODB_SERVER: mongodb 
-      ME_CONFIG_BASICAUTH_USERNAME: ${DB_USERNAME} 
+      ME_CONFIG_MONGODB_SERVER: mongodb
+      ME_CONFIG_BASICAUTH_USERNAME: ${DB_USERNAME}
       ME_CONFIG_BASICAUTH_PASSWORD: ${DB_PASSWORD}
 
     depends_on:
       - mongodb
 
+  frontend:
+    build:
+      context: ./frontend
+    restart: always
+    volumes:
+      - ./frontend/conf.d:/etc/nginx/conf.d
+    ports:
+      - 8000:80
+    depends_on:
+      - backend
+    networks:
+      - roykestereo-network
+
+  backend:
+    build: ./backend
+    restart: always
+    ports:
+      - 5000:5000
+    networks:
+      - roykestereo-network
+    environment:
+      DB_USER: ${DB_USERNAME}
+      DB_PASSWORD: ${DB_PASSWORD}
+      DB_HOST: mongodb
+    volumes:
+      - ./backend:/app
+    depends_on:
+      - mongodb
+
 volumes:
   mongodata:
+
 
 networks:
   roykestereo-network:

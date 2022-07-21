@@ -1,12 +1,12 @@
 import chunk
-from gettext import bind_textdomain_codeset
-from scipy.io import wavfile
-from scipy.fft import fft, fftfreq, rfft, rfftfreq
-import numpy as np
 import math
-
 import pickle
+from gettext import bind_textdomain_codeset
+
 import matplotlib.pyplot as plt
+import numpy as np
+from scipy.fft import fft, fftfreq, rfft, rfftfreq
+from scipy.io import wavfile
 
 
 def wav_to_bins(

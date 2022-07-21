@@ -1,15 +1,16 @@
 import base64
-from cgi import test
 import hashlib
 import os
-from flask_cors import CORS
-from flask import Blueprint, request, session
-from bson import ObjectId
+from cgi import test
 
+from bson import ObjectId
+from flask import Blueprint, request, session
+from flask_cors import CORS
+
+from utils.database import get_connection
 
 # from utils.config import get_config
 from utils.validator import Validator
-from utils.database import get_connection
 
 user = Blueprint("user", __name__)
 CORS(user, supports_credentials=True)
