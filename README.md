@@ -11,7 +11,7 @@ A cloud music platform with chat room function
     2. 歸一化
     
 
-![](./demo/banner.gif)
+<img src="./demo/banner.gif" width="100%">
 
 ## demo
 ### Home
