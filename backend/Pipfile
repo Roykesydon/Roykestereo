@@ -9,6 +9,9 @@ scipy = "*"
 matplotlib = "*"
 flask-cors = "*"
 pymongo = "*"
+flask-socketio = "*"
+simple-websocket = "*"
+flask-session = "*"
 
 [dev-packages]
 

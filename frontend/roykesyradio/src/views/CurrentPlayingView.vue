@@ -1,5 +1,5 @@
 <template>
-  <div class="home pa-15" style="overflow-y: scroll">
+  <div class="home pa-15" style="overflow: hidden; max-height: 70vh">
     <v-row
       style="height: 85vh; width: 80vw; overflow-x: hidden"
       justify="center"
@@ -15,7 +15,7 @@
               class="mt-0 mb-10 font-weight-thin text-h2"
               style="white-space: nowrap"
             >
-              <span class="mr-5" v-for="i in 20" :key="i">
+              <span class="mr-5 glow" v-for="i in 20" :key="i">
                 {{ musicName }} / {{ authorName }}
                 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
               </span>
@@ -61,6 +61,9 @@ export default {
     currentMusicId: {
       type: String,
     },
+    currentMusicWave: {
+      type: Array,
+    },
   },
   async mounted() {
     // console.log(apiAddress);
@@ -71,15 +74,6 @@ export default {
       let musicInfo = await this.returnMusicInfo(this.currentMusicId);
       this.musicName = musicInfo["music_name"];
       this.authorName = musicInfo["nickname"];
-
-      await this.$axios
-        .get(apiAddress + "/music/wave/" + this.currentMusicId.toString())
-        .then((response) => {
-          this.musicWave = response.data.wave;
-        })
-        .catch((error) => {
-          console.log(error);
-        });
     }
 
     let _this = this;
@@ -103,9 +97,7 @@ export default {
           updateWaveChart();
           return;
         }
-        // console.log(
-        //   _this.$parent.$parent.$parent.$refs.audioPlayer.currentTime
-        // );
+
         let currentTime = Math.floor(
           _this.$parent.$parent.$parent.$refs.audioPlayer.currentTime
         );
@@ -119,12 +111,16 @@ export default {
               (1000 / secondFreq)
           ) + 1;
 
-        if (currentTime * secondFreq + frameCount >= _this.musicWave.length) {
+        if (
+          currentTime * secondFreq + frameCount >=
+          _this.currentMusicWave.length
+        ) {
           updateWaveChart();
           return;
         }
 
-        let wave = _this.musicWave[currentTime * secondFreq + frameCount];
+        let wave =
+          _this.currentMusicWave[currentTime * secondFreq + frameCount];
 
         for (let index = 0; index < wave.length; ++index) wave[index] += 0.005;
 
@@ -140,6 +136,7 @@ export default {
   watch: {
     currentMusicId: async function (newVal, oldVal) {
       console.log("oldVal", oldVal, "newVal", newVal);
+      console.log("wave:", this.currentMusicWave);
       this.updateDataFlag = true;
       this.initChart();
       if (newVal != "") {
@@ -149,17 +146,6 @@ export default {
 
         this.musicName = musicInfo["music_name"];
         this.authorName = musicInfo["nickname"];
-        let _this = this;
-
-        await this.$axios
-          .get(apiAddress + "/music/wave/" + newVal.toString())
-          .then((response) => {
-            if (_this.currentMusicId == newVal)
-              _this.musicWave = response.data.wave;
-          })
-          .catch((error) => {
-            console.log(error);
-          });
       } else {
         this.initChart();
         this.musicCover = "";
@@ -171,7 +157,6 @@ export default {
   },
   data() {
     return {
-      musicWave: [],
       currentAudioName: "",
       chartData: this.getEmptyChart(),
       audioList: [
@@ -243,5 +228,18 @@ export default {
     display: flex;
     animation: scroll 100s linear infinite;
   }
+}
+</style>
+
+<style scope>
+.glow {
+  font-size: 80px;
+  color: #fff;
+  text-align: center;
+  -webkit-animation: glow 1s ease-in-out infinite alternate;
+  -moz-animation: glow 1s ease-in-out infinite alternate;
+  animation: glow 1s ease-in-out infinite alternate;
+  text-shadow: 0 0 10px #fff, 0 0 20px #fff, 0 0 30px #cb25da, 0 0 60px #cb25da,
+    0 0 30px #cb25da, 0 0 40px #cb25da, 0 0 50px #cb25da;
 }
 </style>

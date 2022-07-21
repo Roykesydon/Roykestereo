@@ -1,8 +1,11 @@
-from flask import Flask, Response, render_template
+from distutils.log import debug
+from flask import Flask, Response, render_template, session
 from flask_cors import CORS
 from scipy.io import wavfile
 from scipy.fftpack import fft
 
+from flask_session import Session
+from flask_socketio import SocketIO
 import os
 from datetime import timedelta
 
@@ -15,10 +18,12 @@ app = Flask(__name__, static_folder="static")
 CORS(app, supports_credentials=True)
 
 app.config["SECRET_KEY"] = os.urandom(24)
-app.config["PERMANENT_SESSION_LIFETIME"] = timedelta(days=31)
+app.config["PERMANENT_SESSION_LIFETIME"] = timedelta(days=1)
 
 app.register_blueprint(music, url_prefix="/music")
 app.register_blueprint(user, url_prefix="/user")
+
+socketio = SocketIO(app, cors_allowed_origins="*")
 
 
 @app.route("/audio_visualize")
@@ -46,5 +51,35 @@ def index():
     return render_template("index.html")
 
 
+@socketio.on("join_chat", namespace="/chatroom")
+def join_chat(data):
+    username = data["username"]
+
+    if username is None:
+        socketio.emit(
+            "error", "authentication failed\ntry login again", namespace="/chatroom"
+        )
+        return
+
+    socketio.emit("join_success", {"username": username}, namespace="/chatroom")
+
+
+@socketio.on("send_message", namespace="/chatroom")
+def send_message(data):
+    print("Data", data)
+
+    username = data["username"]
+    msg = data["msg"]
+
+    if username is None:
+        socketio.emit(
+            "error", "authentication failed\ntry login again", namespace="/chatroom"
+        )
+        return
+
+    socketio.emit("get_msg", data, namespace="/chatroom")
+
+
 if __name__ == "__main__":
-    app.run(host="0.0.0.0")
+    socketio.run(app, debug=True, host="0.0.0.0", port=5000)
+    # app.run(host="0.0.0.0")

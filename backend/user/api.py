@@ -6,12 +6,49 @@ from flask_cors import CORS
 from flask import Blueprint, request, session
 from bson import ObjectId
 
+
 # from utils.config import get_config
 from utils.validator import Validator
 from utils.database import get_connection
 
 user = Blueprint("user", __name__)
 CORS(user, supports_credentials=True)
+
+
+@user.route("/sign_out", methods=["POST"])
+def sign_out():
+    return_json = {"success": 0, "msg": ""}
+    session.pop("username", None)
+    return_json["success"] = 1
+    return return_json
+
+
+@user.route("/nickname")
+def get_nickname():
+    return_json = {"success": 0, "msg": "", "data": []}
+    username = request.args.get("username", default=None, type=str)
+
+    if username is None:
+        return_json["msg"] = "please fill username in args"
+
+    """
+    Get connection with mongodb
+    """
+    client = get_connection()
+    db = client["roykestereo_db"]
+
+    users_collection = db["users"]
+
+    user_data = users_collection.find_one({"username": username})
+
+    if user_data is None:
+        return_json["msg"] = "username doesn't exist"
+        return return_json
+
+    return_json["success"] = True
+    return_json["data"] = user_data["nickname"]
+
+    return return_json
 
 
 @user.route("/favorite_list")
@@ -161,7 +198,7 @@ def login():
     return return_json
 
 
-@user.route("/update_favortie_music", methods=["POST"])
+@user.route("/update_favorite_music", methods=["POST"])
 def update_favorite_song():
     data = request.get_json()
     update_method = str(data["method"])  # remove, add

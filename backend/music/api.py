@@ -69,7 +69,6 @@ def upload_music():
     cover = data["cover"]
     music = data["music"]
 
-    cover_extension = cover.split(";")[0].split("/")[-1]
     music_extension = music.split(";")[0].split("/")[-1]
 
     username = session.get("username")
@@ -189,11 +188,3 @@ def upload_music():
     return_json["success"] = 1
 
     return return_json
-
-
-@music.route("/audio_wave/", methods=["GET"])
-def audio_wave():
-    with open("one_last_kiss.pickle", "rb") as file:
-        return {"wave": pickle.load(file)}
-    # with open("one_last_kiss.pickle", "rb") as file:
-    #     return {"wave": pickle.load(file)}

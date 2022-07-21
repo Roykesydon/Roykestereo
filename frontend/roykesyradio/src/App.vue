@@ -10,10 +10,16 @@
           <v-img
             alt="Vuetify Logo"
             class="shrink mr-2"
+            style="cursor: pointer"
             contain
             src="https://cdn.vuetifyjs.com/images/logos/vuetify-logo-dark.png"
             transition="scale-transition"
             width="5vw"
+            @click="
+              () => {
+                this.$router.push('/');
+              }
+            "
           />
         </div>
         <div>
@@ -74,7 +80,7 @@
           class="d-flex justify-start my-3 pl-5 pointer"
           @click="
             () => {
-              this.$router.push('/');
+              this.$router.push('/chat_room');
             }
           "
         >
@@ -125,6 +131,7 @@
               >
                 <router-view
                   :currentMusicId="currentMusicId"
+                  :currentMusicWave="currentMusicWave"
                   style="overflow-y: hidden; overflow-x: hidden"
                 />
               </v-row>
@@ -176,6 +183,7 @@ export default {
     musicNextQueue: [],
     musicPrevStack: [],
     currentMusicId: "",
+    currentMusicWave: [],
     audioList: [],
   }),
 
@@ -189,6 +197,19 @@ export default {
   },
 
   methods: {
+    getWaveData: async function (id) {
+      let data;
+      await this.$axios
+        .get(apiAddress + "/music/wave/" + id.toString())
+        .then((response) => {
+          data = response.data.wave;
+        })
+        .catch((error) => {
+          console.log(error);
+        });
+      return data;
+    },
+
     addToQueue(id) {
       if (id != this.currentMusicId) {
         this.musicNextQueue.push(id);
@@ -205,22 +226,40 @@ export default {
       }
     },
 
-    signOut: function () {
-      clearUserInformationCookies(this);
-      this.$toast.info("Successfully logged out", {
-        position: "top-center",
-        timeout: 2000,
-      });
+    clearUserInformationCookies: clearUserInformationCookies,
 
-      this.$router.push("/login");
+    signOut: async function () {
+      let _this = this;
+
+      await this.$axios
+        .post(apiAddress + "/user/sign_out")
+        .then(async (response) => {
+          if (response.data.success == 1) {
+            _this.$toast.info("Successfully logged out", {
+              position: "top-center",
+              timeout: 2000,
+            });
+            _this.$router.push("/login");
+            _this.clearUserInformationCookies(_this);
+          } else {
+            this.$toast.error(response.data.msg, {
+              position: "top-center",
+              timeout: 2000,
+            });
+          }
+        })
+        .catch((error) => {
+          console.log(error);
+        });
     },
 
-    nextMusic(next) {
+    nextMusic: async function (next) {
       if (this.currentMusicId != "")
         this.musicPrevStack.push(this.currentMusicId);
       console.log(this.musicNextQueue);
       if (this.musicNextQueue.length != 0) {
         this.currentMusicId = this.musicNextQueue[0];
+
         this.audioList = [
           apiAddress + "/music/audio/" + this.currentMusicId.toString(),
         ];
@@ -235,14 +274,16 @@ export default {
 
         this.$refs.audioPlayer.pause();
         this.$refs.audioPlayer.currentTime = 0;
-        setTimeout(next, 700);
+        this.currentMusicWave = await this.getWaveData(this.currentMusicId);
+        console.log("wave", this.currentMusicWave);
+        next();
       } else {
         this.audioList = [""];
         this.currentMusicId = "";
       }
     },
 
-    prevMusic(next) {
+    prevMusic: async function (next) {
       if (this.currentMusicId != "")
         this.musicNextQueue.unshift(this.currentMusicId);
       if (this.musicPrevStack.length != 0) {
@@ -256,7 +297,8 @@ export default {
         this.musicPrevStack.pop();
         this.$refs.audioPlayer.pause();
         this.$refs.audioPlayer.currentTime = 0;
-        setTimeout(next, 700);
+        this.currentMusicWave = await this.getWaveData(this.currentMusicId);
+        next();
       } else {
         this.audioList = [""];
         this.currentMusicId = "";
@@ -312,12 +354,28 @@ export default {
     #08070c,
     #050505
   ); */
-  background-image: linear-gradient(
+  /* background-image: linear-gradient(
     to right top,
     #0f0811,
     #0c070f,
     #09070c,
     #070609,
+    #050505
+  ); */
+  /* background-image: linear-gradient(
+    to top,
+    #1d1021,
+    #180e1c,
+    #120c17,
+    #0b0910,
+    #050505
+  ); */
+  background-image: linear-gradient(
+    to top,
+    #34193b,
+    #261730,
+    #1b1424,
+    #120e18,
     #050505
   );
 }

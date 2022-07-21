@@ -1,4 +1,4 @@
-# roykesyradio
+# roykestereo
 
 ## Project setup
 ```

@@ -1,5 +1,5 @@
 <template>
-  <div class="pa-0" style="overflow-y: hidden; overflow-x: hidden">
+  <div class="pa-10" style="overflow-y: hidden; overflow-x: hidden">
     <div style="overflow-y: hidden; overflow-x: hidden">
       <v-row class="mt-5 ml-10" style="width: 80vw">
         <v-col cols="12" class="font-weight-thin text-h2 py-10">
@@ -221,7 +221,7 @@ export default {
     await this.$axios
       .get(apiAddress + "/user/favorite_list")
       .then(async (response) => {
-        console.log(response.data);
+        // console.log(response.data);
         if (response.data.success == 1) {
           let favoriteList = response.data.data;
           for (let i = 0; i < favoriteList.length; i++) {
@@ -243,12 +243,14 @@ export default {
             });
           }
         }
-        this.musicInfo = Array(parseInt(response.data)).fill({
-          username: "",
-          nickname: "",
-          music_name: "",
-          favorite: false,
-        });
+        // console.log(response.data);
+        // this.musicInfo = Array(parseInt(response.data.data.length)).fill({
+        //   username: "",
+        //   nickname: "",
+        //   music_name: "",
+        //   favorite: false,
+        // });
+        // this.musicInfo
         this.totalMusicCount = parseInt(response.data);
       })
       .catch((error) => {
@@ -257,7 +259,7 @@ export default {
   },
   methods: {
     favoriteColor: function (id) {
-      console.log(this.musicInfo[id]);
+      // console.log(this.musicInfo[id]);
       if (!this.musicInfo[id].favorite) return "pink lighten-4";
       else return "pink";
     },
@@ -267,7 +269,7 @@ export default {
       this.$forceUpdate();
 
       await this.$axios
-        .post(apiAddress + "/user/update_favortie_music", {
+        .post(apiAddress + "/user/update_favorite_music", {
           method: data.favorite ? "add" : "remove",
           music_id: id,
         })
@@ -346,12 +348,12 @@ export default {
             music: this.musicFile,
           },
           {
-            timeout: 1000 * 60 * 5,
+            timeout: 1000 * 60 * 10,
           }
         )
         .then((response) => {
           if (response.data.success == 1) {
-            this.$toast.success("Register Success!\nRedirecting to home page", {
+            this.$toast.success("Upload Success!\n", {
               position: "top-center",
               timeout: 2000,
             });

@@ -82,7 +82,7 @@ export default {
         responsive: true,
         maintainAspectRatio: false,
         animation: {
-          duration: 500,
+          duration: 300,
         },
         color: "#666",
         plugins: {
