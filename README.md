@@ -1,6 +1,30 @@
 # Roykestereo
+A cloud music platform with chat room function
 
+- Implementation method
+  - Chat room
+    - sokcet.io
+  - Audio visualization
+    1. 傅立葉
+    2. 取 0 ~ 2000 Hz
+    3. 取 log
+    2. 歸一化
+    
 
+![](./demo/banner.gif)
+
+## demo
+### Home
+![](./demo/home.png)
+
+### Favorite Playlist
+![](./demo/favorite_playlist.png)
+
+### Current Playing
+![](./demo/current_playing.png)
+
+### Chat Room
+![](./demo/chat_room.png)
 ## How To Execute(develope)
 - database
   1. write .env
@@ -51,10 +75,6 @@
     - 8080
 
 
-## How to Shut down
-```
-docker-compose down
-```
 
 ## TODO / Problem
 
