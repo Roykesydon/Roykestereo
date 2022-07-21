@@ -7,7 +7,8 @@ COPY . /app
 RUN pip install --upgrade pip
 RUN pip install -r requirements.txt
 
-EXPOSE 5000
+EXPOSE 80
+EXPOSE 3000
 
 CMD python app.py
 # CMD waitress-serve --listen=*:5000 app:app
