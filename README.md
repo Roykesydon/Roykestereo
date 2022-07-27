@@ -84,6 +84,7 @@ A cloud music platform with chat room function
   - Frontend reqeust
   - Backend authentication(decorator)
 - Split to components
+- Transaction
 
 ## Bugs that need to be fixed
 
